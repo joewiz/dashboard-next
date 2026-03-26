@@ -1,0 +1,18 @@
+<div class="login-page">
+    <div class="login-card">
+        <h1>eXist-db Dashboard</h1>
+        <p>Administrator access required. Please log in with a DBA account.</p>
+        <form method="post" action="login">
+            <div class="form-field">
+                <label for="user">Username</label>
+                <input type="text" id="user" name="user" required="" autocomplete="username"/>
+            </div>
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required="" autocomplete="current-password"/>
+            </div>
+            <input type="hidden" name="duration" value="P7D"/>
+            <button type="submit">Log in</button>
+        </form>
+    </div>
+</div>

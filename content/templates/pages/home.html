@@ -1,0 +1,71 @@
+<div data-template="app:active-tab">
+    <div class="home-page">
+        <header class="page-header">
+            <h1>eXist-db Dashboard</h1>
+        </header>
+
+        <div class="stats-grid" data-template="app:system-info">
+            <div class="stat-card" id="card-version">
+                <h2 class="stat-label">Version</h2>
+                <p class="stat-value">
+                    <span data-template="lib:value" data-template-value="$model?product-name">eXist</span>
+                    <span data-template="lib:value" data-template-value="$model?product-version"></span>
+                </p>
+                <p class="stat-detail">
+                    Build <span data-template="lib:value" data-template-value="$model?build"></span>
+                    &middot; <span data-template="lib:value" data-template-value="$model?revision"></span>
+                </p>
+            </div>
+
+            <div class="stat-card" id="card-java">
+                <h2 class="stat-label">Java</h2>
+                <p class="stat-value" data-template="lib:value" data-template-value="$model?java-version"></p>
+                <p class="stat-detail" data-template="lib:value" data-template-value="$model?java-vendor"></p>
+            </div>
+
+            <div class="stat-card" id="card-os">
+                <h2 class="stat-label">Platform</h2>
+                <p class="stat-value" data-template="lib:value" data-template-value="$model?os-name"></p>
+                <p class="stat-detail" data-template="lib:value" data-template-value="$model?os-arch"></p>
+            </div>
+
+            <div class="stat-card" id="card-uptime">
+                <h2 class="stat-label">Uptime</h2>
+                <p class="stat-value" id="uptime-value">--</p>
+                <p class="stat-detail" id="uptime-since">Loading...</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card" id="card-memory">
+                <h2 class="stat-label">Memory</h2>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="memory-bar" style="width: 0%"></div>
+                </div>
+                <p class="stat-detail" id="memory-detail">Loading...</p>
+            </div>
+
+            <div class="stat-card" id="card-brokers">
+                <h2 class="stat-label">Active Brokers</h2>
+                <p class="stat-value" id="brokers-value">--</p>
+                <p class="stat-detail" id="brokers-detail">Loading...</p>
+            </div>
+
+            <div class="stat-card" id="card-queries">
+                <h2 class="stat-label">Running Queries</h2>
+                <p class="stat-value" id="queries-value">--</p>
+                <p class="stat-detail" id="queries-detail">Loading...</p>
+            </div>
+
+            <div class="stat-card" id="card-packages">
+                <h2 class="stat-label">Packages</h2>
+                <p class="stat-value" id="packages-value">--</p>
+                <p class="stat-detail" id="packages-detail">Loading...</p>
+            </div>
+        </div>
+
+        <div id="api-status" class="api-status" hidden>
+            <p id="api-status-message"></p>
+        </div>
+    </div>
+</div>

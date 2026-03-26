@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta xmlns="http://exist-db.org/xquery/repo">
+    <description>Administration dashboard for eXist-db</description>
+    <author>The eXist-db Authors</author>
+    <website>https://github.com/eXist-db/dashboard</website>
+    <status>beta</status>
+    <license>GNU-LGPL</license>
+    <copyright>true</copyright>
+    <type>application</type>
+    <target>dashboard</target>
+    <permissions user="admin" group="dba" mode="rw-rw-r--"/>
+    <prepare/>
+    <finish/>
+</meta>
