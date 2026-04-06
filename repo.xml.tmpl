@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta xmlns="http://exist-db.org/xquery/repo">
+    <description>@description@</description>
+    <author>@author@</author>
+    <website>@website@</website>
+    <status>@status@</status>
+    <license>@license@</license>
+    <copyright>true</copyright>
+    <type>application</type>
+    <target>@target@</target>
+    <permissions user="admin" group="dba" mode="rw-rw-r--"/>
+    <prepare/>
+    <finish>finish.xq</finish>
+    <changelog>
+        <change version="3.0.0">
+            <ul xmlns="http://www.w3.org/1999/xhtml">
+                <li>Ground-up rewrite with Jinks templates and site-shell integration</li>
+                <li>Absorbs monitoring features from monex</li>
+                <li>Uses exist-api as REST backend</li>
+            </ul>
+        </change>
+    </changelog>
+</meta>

@@ -1,0 +1,86 @@
+<div data-template="app:active-tab">
+    <div class="packages-page">
+        <header class="page-header">
+            <h1>Packages</h1>
+            <p>Install, update, and remove XAR packages.</p>
+        </header>
+
+        <div class="tab-group">
+            <button type="button" class="tab-btn active" data-tab="installed">Installed</button>
+            <button type="button" class="tab-btn" data-tab="available">Available</button>
+        </div>
+
+        <!-- Installed packages panel -->
+        <div class="tab-panel active" id="panel-installed">
+            <div class="toolbar">
+                <input type="text" id="pkg-filter" placeholder="Filter packages..." class="filter-input"/>
+                <button type="button" id="pkg-install-btn" class="btn btn-primary">Install from URL</button>
+                <label class="btn btn-file">
+                    Upload XAR
+                    <input type="file" id="pkg-upload" accept=".xar" hidden=""/>
+                </label>
+                <button type="button" id="pkg-refresh" class="btn">Refresh</button>
+            </div>
+            <table class="data-table sortable" id="packages-table">
+                <thead>
+                    <tr>
+                        <th data-sort="title">Title</th>
+                        <th data-sort="abbrev">Abbreviation</th>
+                        <th data-sort="version">Version</th>
+                        <th data-sort="type">Type</th>
+                        <th/>
+                    </tr>
+                </thead>
+                <tbody id="packages-body">
+                    <tr><td colspan="5" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Available packages panel -->
+        <div class="tab-panel" id="panel-available">
+            <div class="toolbar">
+                <input type="text" id="avail-filter" placeholder="Filter available packages..." class="filter-input"/>
+                <button type="button" id="avail-refresh" class="btn">Refresh</button>
+            </div>
+            <table class="data-table sortable" id="available-table">
+                <thead>
+                    <tr>
+                        <th data-sort="title">Title</th>
+                        <th data-sort="abbrev">Abbreviation</th>
+                        <th data-sort="version">Version</th>
+                        <th data-sort="type">Type</th>
+                        <th/>
+                    </tr>
+                </thead>
+                <tbody id="available-body">
+                    <tr><td colspan="5" class="empty-state">Loading available packages...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Install from URL dialog -->
+        <div id="install-dialog" class="dialog-overlay" hidden="">
+            <div class="dialog">
+                <h2>Install Package from URL</h2>
+                <div class="form-field">
+                    <label for="install-url">Package URL</label>
+                    <input type="url" id="install-url" placeholder="https://..." class="full-width"/>
+                </div>
+                <div class="dialog-actions">
+                    <button type="button" id="install-confirm" class="btn btn-primary">Install</button>
+                    <button type="button" id="install-cancel" class="btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Package info dialog -->
+        <div id="info-dialog" class="dialog-overlay" hidden="">
+            <div class="dialog dialog-wide">
+                <button type="button" class="dialog-close" id="info-close-x" aria-label="Close">&#215;</button>
+                <div id="info-dialog-content"/>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="resources/js/packages.js"></script>
+</div>

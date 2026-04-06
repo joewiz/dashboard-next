@@ -1,0 +1,73 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Dashboard Login API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        { "url": "/exist/apps/dashboard" }
+    ],
+    "components": {
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "name": "org.exist.login.user",
+                "in": "cookie"
+            }
+        }
+    },
+    "paths": {
+        "/login": {
+            "post": {
+                "summary": "Login",
+                "operationId": "login:login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user": { "type": "string" },
+                                    "password": { "type": "string" }
+                                }
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "user": { "type": "string" },
+                                    "password": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Login successful" },
+                    "401": { "description": "Login failed" }
+                },
+                "security": []
+            },
+            "get": {
+                "summary": "Check login status",
+                "operationId": "login:status",
+                "responses": {
+                    "200": { "description": "Current user info" }
+                },
+                "security": []
+            }
+        },
+        "/logout": {
+            "get": {
+                "summary": "Logout",
+                "operationId": "login:logout",
+                "responses": {
+                    "200": { "description": "Logged out" }
+                },
+                "security": []
+            }
+        }
+    }
+}

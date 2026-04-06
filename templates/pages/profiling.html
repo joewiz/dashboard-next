@@ -1,0 +1,78 @@
+<div data-template="app:active-tab">
+    <div class="profiling-page">
+        <header class="page-header">
+            <h1>Profiling</h1>
+            <p>Query execution times, slow query log, optimization analysis.</p>
+        </header>
+
+        <div class="toolbar">
+            <button type="button" id="prof-enable" class="btn">Enable</button>
+            <button type="button" id="prof-disable" class="btn">Disable</button>
+            <button type="button" id="prof-refresh" class="btn">Refresh</button>
+            <button type="button" id="prof-clear" class="btn">Clear</button>
+            <button type="button" id="prof-tare" class="btn" title="Set current trace as baseline (subtract from future measurements)">Tare</button>
+            <button type="button" id="prof-clear-tare" class="btn" hidden="">Clear Tare</button>
+            <span id="prof-status" class="status-badge">--</span>
+        </div>
+
+        <div class="tab-group">
+            <button type="button" class="tab-btn active" data-tab="queries">Queries</button>
+            <button type="button" class="tab-btn" data-tab="functions">Functions</button>
+            <button type="button" class="tab-btn" data-tab="indexes">Index Usage</button>
+        </div>
+
+        <div class="tab-panel active" id="panel-queries">
+            <table class="data-table sortable">
+                <thead>
+                    <tr>
+                        <th data-sort="source">Source</th>
+                        <th data-sort="calls">Calls</th>
+                        <th data-sort="elapsed">Elapsed (ms)</th>
+                    </tr>
+                </thead>
+                <tbody id="queries-data">
+                    <tr><td colspan="3" class="empty-state">Enable tracing to collect data</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-panel" id="panel-functions">
+            <table class="data-table sortable">
+                <thead>
+                    <tr>
+                        <th data-sort="name">Function</th>
+                        <th data-sort="source">Source</th>
+                        <th data-sort="calls">Calls</th>
+                        <th data-sort="elapsed">Elapsed (ms)</th>
+                    </tr>
+                </thead>
+                <tbody id="functions-data">
+                    <tr><td colspan="4" class="empty-state">Enable tracing to collect data</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-panel" id="panel-indexes">
+            <div class="optimization-legend">
+                <span class="opt-badge opt-full">Full</span> Index fully optimized
+                <span class="opt-badge opt-basic">Basic</span> Index used for lookup only
+                <span class="opt-badge opt-none">None</span> No index available
+            </div>
+            <table class="data-table sortable">
+                <thead>
+                    <tr>
+                        <th data-sort="source">Source</th>
+                        <th data-sort="type">Type</th>
+                        <th data-sort="calls">Calls</th>
+                        <th data-sort="elapsed">Elapsed (ms)</th>
+                        <th data-sort="optimization">Optimization</th>
+                    </tr>
+                </thead>
+                <tbody id="indexes-data">
+                    <tr><td colspan="5" class="empty-state">Enable tracing to collect data</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="module" src="resources/js/profiling.js"></script>
+</div>

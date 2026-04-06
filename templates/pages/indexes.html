@@ -1,0 +1,56 @@
+<div data-template="app:active-tab">
+    <div class="indexes-page">
+        <header class="page-header">
+            <h1>Indexes</h1>
+            <p>Browse Lucene, range, and ngram index configurations.</p>
+        </header>
+
+        <div class="toolbar">
+            <select id="idx-collection" class="filter-input">
+                <option value="">Loading collections...</option>
+            </select>
+            <button type="button" id="idx-refresh" class="btn">Refresh</button>
+        </div>
+
+        <div id="idx-summary" class="monitor-row" hidden="">
+            <div class="monitor-stat">
+                <span class="monitor-label">Lucene</span>
+                <span class="monitor-value" id="idx-lucene-count">0</span>
+            </div>
+            <div class="monitor-stat">
+                <span class="monitor-label">Range</span>
+                <span class="monitor-value" id="idx-range-count">0</span>
+            </div>
+            <div class="monitor-stat">
+                <span class="monitor-label">NGram</span>
+                <span class="monitor-value" id="idx-ngram-count">0</span>
+            </div>
+        </div>
+
+        <table class="data-table" id="idx-table">
+            <thead>
+                <tr>
+                    <th>Indexed Item</th>
+                    <th>Index Type</th>
+                    <th>Details</th>
+                    <th/>
+                </tr>
+            </thead>
+            <tbody id="idx-body">
+                <tr><td colspan="4" class="empty-state">Select a collection to view its index configuration</td></tr>
+            </tbody>
+        </table>
+
+        <!-- Facets/Fields detail (shown inline when an index is expanded) -->
+        <div id="idx-detail" class="monitor-section" hidden="">
+            <h2 id="idx-detail-title">Facets &amp; Fields</h2>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Name</th><th>Type</th><th>Expression</th><th>Details</th></tr>
+                </thead>
+                <tbody id="idx-detail-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script type="module" src="resources/js/indexes.js"></script>
+</div>

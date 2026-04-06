@@ -1,0 +1,18 @@
+<div data-template="app:active-tab">
+    <div class="home-page">
+        <header class="page-header">
+            <h1>eXist-db Dashboard</h1>
+        </header>
+
+        <!-- Launcher: visible to all users -->
+        <div class="launcher-grid" data-template="app:launcher">
+            <div data-template="app:launcher-app"/>
+        </div>
+
+        <!-- Admin-only: system stats and JMX monitoring -->
+        <div data-template="app:if-admin">
+            <h2 class="section-heading">System Status</h2>
+            <div data-template="app:system-status"/>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,121 @@
+<div data-template="app:active-tab">
+    <div class="monitoring-page">
+        <div data-template="app:jmx-token"/>
+        <header class="page-header">
+            <h1>Monitoring</h1>
+            <p>Real-time JMX monitoring: memory, threads, caches, active brokers.</p>
+        </header>
+
+        <!-- Memory chart -->
+        <div class="monitor-section">
+            <h2>Heap Memory</h2>
+            <div class="chart-container">
+                <canvas id="memory-chart" height="180"></canvas>
+            </div>
+            <div class="monitor-row" id="memory-stats">
+                <div class="monitor-stat">
+                    <span class="monitor-label">Used</span>
+                    <span class="monitor-value" id="mem-used">--</span>
+                </div>
+                <div class="monitor-stat">
+                    <span class="monitor-label">Committed</span>
+                    <span class="monitor-value" id="mem-committed">--</span>
+                </div>
+                <div class="monitor-stat">
+                    <span class="monitor-label">Max</span>
+                    <span class="monitor-value" id="mem-max">--</span>
+                </div>
+                <div class="monitor-stat">
+                    <button type="button" id="gc-btn" class="btn btn-sm">Run GC</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CPU -->
+        <div class="monitor-section">
+            <h2>CPU</h2>
+            <div class="chart-container">
+                <canvas id="cpu-chart" height="120"></canvas>
+            </div>
+            <div class="monitor-row" id="cpu-stats">
+                <div class="monitor-stat">
+                    <span class="monitor-label">Process CPU</span>
+                    <span class="monitor-value" id="cpu-process">--</span>
+                </div>
+                <div class="monitor-stat">
+                    <span class="monitor-label">System CPU</span>
+                    <span class="monitor-value" id="cpu-system">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brokers & Queries -->
+        <div class="monitor-grid">
+            <div class="monitor-section">
+                <h2>Database Brokers</h2>
+                <div class="monitor-row">
+                    <div class="monitor-stat">
+                        <span class="monitor-label">Active</span>
+                        <span class="monitor-value" id="brokers-active">--</span>
+                    </div>
+                    <div class="monitor-stat">
+                        <span class="monitor-label">Total</span>
+                        <span class="monitor-value" id="brokers-total">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="monitor-section">
+                <h2>Running Queries</h2>
+                <table class="data-table" id="queries-table">
+                    <thead>
+                        <tr><th>Source</th><th>Elapsed</th><th></th></tr>
+                    </thead>
+                    <tbody id="queries-body">
+                        <tr><td colspan="3" class="empty-state">No running queries</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Caches -->
+        <div class="monitor-section">
+            <h2>Caches</h2>
+            <table class="data-table" id="caches-table">
+                <thead>
+                    <tr><th>Cache</th><th>Used</th><th>Max</th><th>Hits</th><th>Misses</th><th>Usage</th></tr>
+                </thead>
+                <tbody id="caches-body">
+                    <tr><td colspan="6" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Active Threads -->
+        <div class="monitor-section">
+            <h2>Active Threads</h2>
+            <table class="data-table" id="threads-table">
+                <thead>
+                    <tr><th>Thread</th><th>State</th></tr>
+                </thead>
+                <tbody id="threads-body">
+                    <tr><td colspan="2" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recent Query History -->
+        <div class="monitor-section">
+            <h2>Recent Query History</h2>
+            <table class="data-table" id="history-table">
+                <thead>
+                    <tr><th>Source</th><th>Duration (ms)</th><th>Request URI</th></tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr><td colspan="3" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="module" src="resources/js/monitoring.js"></script>
+</div>

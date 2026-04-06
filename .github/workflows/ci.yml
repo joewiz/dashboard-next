@@ -1,0 +1,79 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build XAR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Upload XAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-xar
+          path: dist/*.xar
+
+  test:
+    name: Test (eXist ${{ matrix.exist-version }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        exist-version: [latest, release]
+    services:
+      exist:
+        image: existdb/existdb:${{ matrix.exist-version }}
+        ports:
+          - 8080:8080
+          - 8443:8443
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install XAR into eXist-db
+        run: npx --yes @existdb/xst package install dist/dashboard-*.xar
+        env:
+          EXISTDB_USER: admin
+          EXISTDB_PASS:
+      - name: Run Cypress E2E tests
+        run: npx cypress run
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-${{ matrix.exist-version }}
+          path: target/cypress/screenshots
+          if-no-files-found: ignore
+      - name: Upload videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos-${{ matrix.exist-version }}
+          path: target/cypress/videos
+          if-no-files-found: ignore
+
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+      - run: npm ci
+      - name: Run npm audit
+        run: npm audit --audit-level=critical
+        continue-on-error: true

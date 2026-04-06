@@ -1,0 +1,43 @@
+<div data-template="app:active-tab">
+    <div class="console-page">
+        <header class="page-header">
+            <h1>Console</h1>
+            <p>Execute XQuery with admin privileges and view results.</p>
+        </header>
+
+        <div class="console-editor">
+            <div class="toolbar">
+                <button type="button" id="run-btn" class="btn btn-primary" title="Ctrl+Enter">Run</button>
+                <button type="button" id="cancel-btn" class="btn" disabled="">Cancel</button>
+                <label class="toolbar-select">
+                    Output:
+                    <select id="serialization">
+                        <option value="adaptive" selected="">Adaptive</option>
+                        <option value="xml">XML</option>
+                        <option value="json">JSON</option>
+                        <option value="text">Text</option>
+                    </select>
+                </label>
+                <span id="console-status" class="status-badge status-off">Ready</span>
+            </div>
+            <textarea id="query-input" rows="10" spellcheck="false"
+                      placeholder="Enter XQuery expression...">for $i in 1 to 10&#10;return $i</textarea>
+        </div>
+
+        <div class="console-output">
+            <div class="toolbar">
+                <span class="toolbar-label">Results</span>
+                <span id="result-info" class="toolbar-detail"></span>
+                <button type="button" id="clear-output" class="btn btn-sm">Clear</button>
+            </div>
+            <pre id="result-panel" class="result-panel"></pre>
+            <div id="error-panel" class="error-panel" hidden=""></div>
+        </div>
+
+        <div class="console-history">
+            <h2>Query History</h2>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+    <script type="module" src="resources/js/console.js"></script>
+</div>
