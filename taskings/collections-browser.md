@@ -203,7 +203,7 @@ Contextual action bar below the resource table.
 |--------|---------|----------|
 | New Collection | Button + dialog (name input) | POST /api/db/collection |
 | Upload | Button → file picker; drag-drop anywhere on resource list | POST /api/db/resource (multipart) |
-| Download | Button or context menu; respects serialization prefs | GET /api/db/resource?path=...&download=true&indent=...&expand-xincludes=... |
+| Download | Single resource: direct download; collection: ZIP; multi-select: one download per item | Resources: `GET /api/db/resource?path=...&download=true`; Collections: `GET /api/db/collection?path=...` → ZIP |
 | Rename | Context menu → inline edit or dialog; F2 shortcut | POST /api/db/rename |
 | Delete | Button or context menu → confirm dialog | DELETE /api/db/resource (or collection) |
 | Cut | Button or Ctrl+X → stores in clipboard | (client-side clipboard) |
@@ -326,7 +326,13 @@ POST /api/db/rename
 **Enhancements to db:get-resource**:
 - Support `indent`, `expand-xincludes`, `omit-xml-decl` query parameters for serialization control on download (some may already work via `exist:serialize`)
 
-**Already available — reuse as-is**:
+**Fix needed:**
+- `GET /api/db/collection?path=...` (download collection as ZIP) — implementation exists
+  in `db:download-collection` using `compression:zip()`, but roaster returns 405. Likely a
+  route registration issue in api.json or a roaster version incompatibility. The function
+  and XQuery code are correct.
+
+**Already available — reuse as-is:**
 - `db:copy`, `db:move` — handle both resources and collections
 - `db:properties` — full metadata including ACLs
 - `db:set-permissions` — owner, group, mode
