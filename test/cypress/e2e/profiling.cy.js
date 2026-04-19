@@ -32,7 +32,7 @@ describe('Profiling Tab', () => {
     cy.get('#prof-status').should('contain', 'ON');
 
     // Generate some activity by hitting an endpoint
-    cy.request('/exist/apps/dashboard/login');
+    cy.request('/login');
 
     // Refresh trace data
     cy.get('#prof-refresh').click();
@@ -59,7 +59,7 @@ describe('Profiling Tab', () => {
 
   it('should clear trace data', () => {
     cy.get('#prof-enable').click();
-    cy.request('/exist/apps/dashboard/login');
+    cy.request('/login');
     cy.get('#prof-refresh').click();
     cy.get('#prof-clear').click();
     cy.get('#prof-refresh').click();

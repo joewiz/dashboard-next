@@ -77,7 +77,7 @@ describe('Users Tab', () => {
 describe('Users API endpoint', () => {
   it('should return user list as JSON', () => {
     cy.loginApi();
-    cy.request('/exist/apps/dashboard/users/data').then((response) => {
+    cy.request('/users/data').then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.have.property('users');
       expect(response.body.users).to.be.an('array');
@@ -89,7 +89,7 @@ describe('Users API endpoint', () => {
 
   it('should return group list as JSON', () => {
     cy.loginApi();
-    cy.request('/exist/apps/dashboard/users/groups-data').then((response) => {
+    cy.request('/users/groups-data').then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.have.property('groups');
       expect(response.body.groups).to.be.an('array');

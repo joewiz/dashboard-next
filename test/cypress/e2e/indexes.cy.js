@@ -34,7 +34,7 @@ describe('Indexes Tab', () => {
 describe('Indexes API endpoint', () => {
   it('should return configured collections', () => {
     cy.loginApi();
-    cy.request('/exist/apps/dashboard/indexes/collections').then((response) => {
+    cy.request('/indexes/collections').then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.have.property('collections');
       expect(response.body.collections).to.be.an('array');

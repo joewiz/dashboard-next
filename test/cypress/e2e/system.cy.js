@@ -14,6 +14,27 @@ describe('System Tab', () => {
     cy.get('h1').should('contain', 'System');
   });
 
+  it('should display version information', () => {
+    cy.get('#card-version .stat-value').should('not.be.empty');
+    cy.get('#card-version .stat-value').should('contain', 'eXist');
+  });
+
+  it('should display uptime', () => {
+    cy.get('#uptime-value', { timeout: 15000 }).should('not.be.empty');
+    cy.get('#uptime-value').invoke('text').should('match', /\d+[dhm]/);
+  });
+
+  it('should display memory usage with progress bar', () => {
+    cy.get('#card-memory .stat-detail').should('not.contain', '--');
+    cy.get('#memory-bar').should('have.attr', 'style').and('not.contain', 'width: 0%');
+  });
+
+  it('should display package count', () => {
+    cy.get('#packages-value').invoke('text').then((text) => {
+      expect(parseInt(text)).to.be.greaterThan(0);
+    });
+  });
+
   it('should display database information', () => {
     cy.get('#sys-db tbody tr', { timeout: 10000 }).should('have.length.greaterThan', 0);
     cy.get('#sys-db').should('contain', 'eXist');
@@ -31,7 +52,7 @@ describe('System Tab', () => {
 describe('System API endpoint', () => {
   it('should return system info as JSON', () => {
     cy.loginApi();
-    cy.request('/exist/apps/dashboard/system/data').then((response) => {
+    cy.request('/system/data').then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.have.property('db');
       expect(response.body.db).to.have.property('name');
@@ -47,7 +68,7 @@ describe('System API endpoint', () => {
   it('should require DBA authentication', () => {
     cy.clearCookies();
     cy.request({
-      url: '/exist/apps/dashboard/system/data',
+      url: '/system/data',
       failOnStatusCode: false,
     }).its('status').should('eq', 403);
   });

@@ -9,13 +9,14 @@ describe('Tab Navigation', () => {
     cy.loginApi();
   });
 
-  it('should load the Home tab by default', () => {
+  it('should load the Launcher tab by default', () => {
     cy.visit('/');
     cy.get('.home-page').should('exist');
-    cy.get('.dashboard-tabs a.active').should('contain', 'Home');
+    cy.get('.dashboard-tabs a.active').should('contain', 'Launcher');
   });
 
   const tabs = [
+    { path: '/collections', heading: 'Collections', cssClass: '.collections-page' },
     { path: '/packages', heading: 'Packages', cssClass: '.packages-page' },
     { path: '/users', heading: 'Users', cssClass: '.users-page' },
     { path: '/monitoring', heading: 'Monitoring', cssClass: '.monitoring-page' },

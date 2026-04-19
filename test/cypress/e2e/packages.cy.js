@@ -55,7 +55,7 @@ describe('Packages Tab', () => {
 describe('Packages API endpoint', () => {
   it('should return package list as JSON', () => {
     cy.loginApi();
-    cy.request('/exist/apps/dashboard/packages/data').then((response) => {
+    cy.request('/packages/data').then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.have.property('packages');
       expect(response.body.packages).to.be.an('array');
@@ -66,7 +66,7 @@ describe('Packages API endpoint', () => {
   it('should require DBA authentication', () => {
     cy.clearCookies();
     cy.request({
-      url: '/exist/apps/dashboard/packages/data',
+      url: '/packages/data',
       failOnStatusCode: false,
     }).its('status').should('eq', 403);
   });
