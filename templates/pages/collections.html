@@ -1,0 +1,123 @@
+<div data-template="app:active-tab">
+    <div class="collections-page">
+        <header class="page-header">
+            <h1>Collections</h1>
+        </header>
+
+        <div class="collections-layout">
+            <aside class="collections-sidebar" id="collections-tree">
+                <div class="collections-tree-root"></div>
+            </aside>
+            <main class="collections-main">
+                <nav class="breadcrumb-bar" id="collections-breadcrumb"></nav>
+                <div class="toolbar" id="collections-toolbar">
+                    <input type="text" id="coll-filter" placeholder="Filter by name..." class="filter-input"/>
+                    <button type="button" id="coll-up-btn" class="btn" title="Go to parent collection">Up</button>
+                    <button type="button" id="coll-new-btn" class="btn btn-primary">New Collection</button>
+                    <label class="btn btn-file">
+                        Upload
+                        <input type="file" id="coll-upload" multiple="" hidden=""/>
+                    </label>
+                </div>
+                <div class="resource-list-container" id="resource-list">
+                    <table class="data-table sortable" id="resource-table">
+                        <thead>
+                            <tr>
+                                <th class="col-checkbox"><input type="checkbox" id="coll-select-all" title="Select all"/></th>
+                                <th data-sort="name">Name</th>
+                                <th data-sort="type">Type</th>
+                                <th data-sort="size">Size</th>
+                                <th data-sort="modified">Modified</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resource-body">
+                            <tr><td colspan="5" class="empty-state"><span class="spinner"></span> Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="collections-action-bar" id="collections-actions" hidden="">
+                    <span class="action-bar-count" id="action-count"></span>
+                    <button type="button" class="btn btn-sm" id="action-cut" title="Cut (Ctrl+X)">Cut</button>
+                    <button type="button" class="btn btn-sm" id="action-copy" title="Copy (Ctrl+C)">Copy</button>
+                    <button type="button" class="btn btn-sm" id="action-paste" title="Paste (Ctrl+V)" disabled="">Paste</button>
+                    <button type="button" class="btn btn-sm btn-danger" id="action-delete" title="Delete">Delete</button>
+                    <button type="button" class="btn btn-sm" id="action-permissions" title="Permissions">Permissions</button>
+                </div>
+                <div class="collections-info-bar" id="collections-info" hidden="">
+                    <div class="info-bar-details" id="info-details"></div>
+                    <div class="info-bar-actions" id="info-actions"></div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Create collection dialog -->
+        <div id="create-collection-dialog" class="dialog-overlay" hidden="">
+            <div class="dialog">
+                <h2>New Collection</h2>
+                <div class="form-field">
+                    <label for="new-collection-name">Collection name</label>
+                    <input type="text" id="new-collection-name" placeholder="my-collection"/>
+                </div>
+                <div class="dialog-actions">
+                    <button type="button" id="create-collection-confirm" class="btn btn-primary">Create</button>
+                    <button type="button" id="create-collection-cancel" class="btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete confirmation dialog -->
+        <div id="delete-confirm-dialog" class="dialog-overlay" hidden="">
+            <div class="dialog">
+                <h2>Confirm Delete</h2>
+                <p id="delete-confirm-message"></p>
+                <div class="dialog-actions">
+                    <button type="button" id="delete-confirm-yes" class="btn btn-danger">Delete</button>
+                    <button type="button" id="delete-confirm-no" class="btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rename dialog -->
+        <div id="rename-dialog" class="dialog-overlay" hidden="">
+            <div class="dialog">
+                <h2>Rename</h2>
+                <div class="form-field">
+                    <label for="rename-input">New name</label>
+                    <input type="text" id="rename-input"/>
+                </div>
+                <div class="dialog-actions">
+                    <button type="button" id="rename-confirm" class="btn btn-primary">Rename</button>
+                    <button type="button" id="rename-cancel" class="btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview dialog -->
+        <div id="preview-dialog" class="dialog-overlay" hidden="">
+            <div class="dialog dialog-preview">
+                <button type="button" class="dialog-close" id="preview-close-x" aria-label="Close">&#215;</button>
+                <h2 id="preview-title"></h2>
+                <div id="preview-body" class="preview-body"></div>
+                <div class="dialog-actions">
+                    <button type="button" id="preview-download" class="btn btn-primary">Download</button>
+                    <button type="button" id="preview-exide" class="btn">Open in eXide</button>
+                    <button type="button" id="preview-close" class="btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permissions dialog -->
+        <div id="permissions-dialog" class="dialog-overlay" hidden="">
+            <div class="dialog dialog-wide">
+                <button type="button" class="dialog-close" id="permissions-close-x" aria-label="Close">&#215;</button>
+                <h2>Permissions</h2>
+                <div id="permissions-content"></div>
+                <div class="dialog-actions">
+                    <button type="button" id="permissions-save" class="btn btn-primary">Save</button>
+                    <button type="button" id="permissions-cancel" class="btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="resources/js/collections.js"></script>
+</div>
