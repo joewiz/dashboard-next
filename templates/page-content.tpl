@@ -15,7 +15,8 @@
 <div class="dashboard">
     <nav class="dashboard-tabs" aria-label="Dashboard navigation">
         <ul>
-            <li><a href="[[ $context-path ]]/" class="[[ $tabs?home ]]">Home</a></li>
+            <li><a href="[[ $context-path ]]/" class="[[ $tabs?home ]]">Launcher</a></li>
+            <li><a href="[[ $context-path ]]/collections" class="[[ $tabs?collections ]]">Collections</a></li>
             <li><a href="[[ $context-path ]]/packages" class="[[ $tabs?packages ]]">Packages</a></li>
             <li><a href="[[ $context-path ]]/users" class="[[ $tabs?users ]]">Users</a></li>
             <li><a href="[[ $context-path ]]/monitoring" class="[[ $tabs?monitoring ]]">Monitoring</a></li>

@@ -193,9 +193,9 @@ function stopAutoRefresh() {
 /**
  * Initialize the Home tab.
  */
-async function initHome() {
-    const homePage = document.querySelector('.home-page');
-    if (!homePage) return;
+async function initJmxPolling() {
+    // JMX stat cards live on the System page
+    if (!document.querySelector('.system-page')) return;
 
     // Immediately poll JMX for live stats (brokers, queries, memory)
     await refreshJmx();
@@ -214,9 +214,9 @@ async function initHome() {
 
 // Run on DOM ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initHome);
+    document.addEventListener('DOMContentLoaded', initJmxPolling);
 } else {
-    initHome();
+    initJmxPolling();
 }
 
 // Export for use by tab-specific modules
