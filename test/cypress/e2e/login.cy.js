@@ -9,14 +9,14 @@ describe('Login', () => {
     cy.clearCookies();
     cy.visit('/');
     cy.get('.login-card').should('be.visible');
-    cy.get('.login-card h1').should('contain', 'Dashboard');
+    cy.get('.login-card h1').should('contain', 'Login');
   });
 
   it('should reject invalid credentials', () => {
     cy.clearCookies();
     cy.request({
       method: 'POST',
-      url: '/exist/apps/dashboard/login',
+      url: '/login',
       form: true,
       body: { user: 'invalid', password: 'wrong' },
       failOnStatusCode: false,
@@ -26,7 +26,7 @@ describe('Login', () => {
   it('should accept valid admin credentials', () => {
     cy.request({
       method: 'POST',
-      url: '/exist/apps/dashboard/login',
+      url: '/login',
       form: true,
       body: { user: 'admin', password: '', duration: 'P7D' },
     }).then((response) => {
@@ -38,7 +38,7 @@ describe('Login', () => {
 
   it('should report login status via GET /login', () => {
     cy.loginApi();
-    cy.request('/exist/apps/dashboard/login').then((response) => {
+    cy.request('/login').then((response) => {
       expect(response.body).to.have.property('user', 'admin');
     });
   });

@@ -99,11 +99,31 @@ if ($local:is-get and $exist:path eq '') then (
     let $tab := substring($exist:path, 2)
     return local:render-page($local:tabs($tab), $tab)
 
-(: --- Login/Logout — handled by Roaster for cookie compatibility with exist-api --- :)
+(: --- Login (GET) — show login form --- :)
 
-) else if ($exist:path = ('/login', '/logout')) then (
+) else if ($exist:path = '/login' and $local:is-get) then (
+    <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+        <forward url="{$exist:controller}/modules/view.xq">
+            <set-attribute name="template" value="templates/pages/login.html"/>
+            <set-attribute name="active-tab" value=""/>
+        </forward>
+    </dispatch>
+
+(: --- Login (POST) — handled by Roaster for cookie compatibility --- :)
+
+) else if ($exist:path = '/login') then (
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
         <forward url="{$exist:controller}/modules/login-api.xq"/>
+    </dispatch>
+
+(: --- Logout: clear cookie and redirect to login page --- :)
+
+) else if ($exist:path = '/logout') then (
+    response:set-cookie("org.exist.login.user", "deleted", xs:dayTimeDuration("-P1D"), false(), (),
+        request:get-context-path()),
+    session:invalidate(),
+    <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+        <redirect url="{request:get-context-path()}/apps/dashboard/"/>
     </dispatch>
 
 (: --- Icon endpoint (public, like packageservice get-icon.xql) --- :)

@@ -15,7 +15,7 @@ Cypress.Commands.add('loginApi', () => {
     () => {
       cy.request({
         method: 'POST',
-        url: '/exist/apps/dashboard/login',
+        url: '/login',
         form: true,
         body: {
           user: 'admin',
@@ -35,7 +35,7 @@ Cypress.Commands.add('loginApi', () => {
     {
       validate() {
         cy.request({
-          url: '/exist/apps/dashboard/login',
+          url: '/login',
           failOnStatusCode: false,
         }).its('status').should('eq', 200);
       },
