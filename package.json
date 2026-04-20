@@ -39,7 +39,7 @@
     "namespace": "http://exist-db.org/apps/dashboard",
     "website": "https://github.com/eXist-db/dashboard",
     "status": "beta",
-    "title": "Dashboard",
+    "title": "eXist-db Dashboard",
     "license": "LGPL-2.1-or-later"
   },
   "devDependencies": {
