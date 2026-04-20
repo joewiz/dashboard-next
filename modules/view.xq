@@ -70,7 +70,7 @@ declare function local:context() as map(*) {
     let $contextPath := request:get-context-path() || "/apps/dashboard"
     let $activeTab := request:get-attribute("active-tab")
     let $tabs := map:merge(
-        for $tab in ("home", "packages", "users", "monitoring", "profiling", "console", "indexes", "system")
+        for $tab in ("home", "collections", "packages", "users", "monitoring", "profiling", "console", "indexes", "system")
         return map { $tab: if ($tab eq $activeTab) then "active" else "" }
     )
     return map {

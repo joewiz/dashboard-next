@@ -39,18 +39,19 @@ declare function local:api($action as xs:string) {
 
 (:~ Tab routes: path segment mapped to page template name :)
 declare variable $local:tabs := map {
-    "":           "home",
-    "packages":   "packages",
-    "users":      "users",
-    "monitoring": "monitoring",
-    "profiling":  "profiling",
-    "console":    "console",
-    "indexes":    "indexes",
-    "system":     "system"
+    "":            "home",
+    "collections": "collections",
+    "packages":    "packages",
+    "users":       "users",
+    "monitoring":  "monitoring",
+    "profiling":   "profiling",
+    "console":     "console",
+    "indexes":     "indexes",
+    "system":      "system"
 };
 
 (:~ Tabs accessible without login :)
-declare variable $local:public-tabs := ("", "home");
+declare variable $local:public-tabs := ("", "home", "collections");
 
 (:~
  : Render a page through the view pipeline.
