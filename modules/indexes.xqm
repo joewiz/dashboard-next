@@ -63,11 +63,14 @@ declare %private function idx:analyze-lucene($xconf as element(cc:collection)) a
     let $lucene := $xconf/cc:index/cc:lucene
     return (
         for $text in $lucene//cc:text
-        let $item := ($text/@qname/string(), $text/@match/string(), "(default)")[1]
+        let $qname := $text/@qname/string()
+        let $match := $text/@match/string()
+        let $item := ($qname, $match, "(default)")[1]
         let $analyzer := $text/@analyzer/string()
         return map {
             "type": "Lucene",
             "item": $item,
+            "has-qname": exists($qname),
             "analyzer": ($analyzer, "default")[1],
             "boost": string(($text/@boost, "")[1]),
             "facets": array {
@@ -145,56 +148,125 @@ declare %private function idx:analyze-new-range($xconf as element(cc:collection)
 };
 
 (:~
+ : Resolve a QName string (possibly prefixed like "db5:keyword") to a proper
+ : xs:QName using namespace declarations from the collection's index config.
+ :)
+declare %private function idx:resolve-qname($qname-str as xs:string, $collection as xs:string) as xs:QName {
+    if (not(contains($qname-str, ':'))) then
+        QName("", $qname-str)
+    else
+        (: Look up the namespace from the collection.xconf :)
+        let $prefix := substring-before($qname-str, ':')
+        let $local := substring-after($qname-str, ':')
+        let $conf-path := "/db/system/config" || $collection
+        let $conf := collection($conf-path)//cc:collection
+        (: Get namespace from the conf document's in-scope namespaces :)
+        let $ns := namespace-uri-for-prefix($prefix, $conf)
+        return
+            if ($ns) then QName($ns, $qname-str)
+            else
+                (: Fallback: try to find a node with this prefix in the data :)
+                let $sample := (collection($collection)//*[local-name() eq $local])[1]
+                return
+                    if (exists($sample)) then node-name($sample)
+                    else QName("", $local)
+};
+
+(:~
+ : Get a nodeset from a collection by QName, for use with util:index-keys.
+ : Mirrors monex's indexes:get-nodeset-from-qname().
+ :)
+declare %private function idx:get-nodeset($collection as xs:string, $qname-str as xs:string) as node()* {
+    let $is-attr := starts-with($qname-str, '@')
+    let $clean := if ($is-attr) then substring($qname-str, 2) else $qname-str
+    return
+        if ($is-attr) then
+            collection($collection)//@*[local-name() eq (if (contains($clean, ':')) then substring-after($clean, ':') else $clean)]
+        else
+            collection($collection)//*[local-name() eq (if (contains($clean, ':')) then substring-after($clean, ':') else $clean)]
+};
+
+(:~
  : Get index keys for a specific item in a collection.
  : Returns terms with frequency and document counts.
  :)
 declare function idx:get-keys($collection as xs:string, $qname as xs:string,
         $index-type as xs:string, $max as xs:integer?) as map(*) {
     let $max-keys := ($max, 50)[1]
-    let $data-collection := $collection
+    (: Use element-based callback to avoid issues with maps in forwarded contexts :)
     let $callback := function($term, $data) {
-        map {
-            "term": string($term),
-            "frequency": $data[1],
-            "documents": $data[2]
-        }
+        <key term="{$term}" frequency="{$data[1]}" documents="{$data[2]}"/>
     }
+    (: For Lucene/NGram, the item might be a path like /topic/title or //section/title
+       — extract just the element name for QName-based lookup :)
+    let $element-name :=
+        if (contains($qname, '/')) then
+            replace($qname, '^.*/', '')
+        else if (starts-with($qname, '@')) then
+            substring($qname, 2)
+        else
+            $qname
+    (: Use util:eval to run the index lookup in a fresh context —
+       forwarded XQuery requests don't always have the right context
+       for util:index-keys-by-qname to find results :)
     let $keys :=
         try {
             if ($index-type = ("Lucene", "NGram")) then
-                (: Use index-keys-by-qname for Lucene/NGram :)
                 let $index-name :=
                     if ($index-type eq "Lucene") then "lucene-index"
                     else "ngram-index"
-                return
-                    util:index-keys-by-qname(
-                        xs:QName($qname), (), $callback, $max-keys, $index-name
+                let $query := ``[
+                    let $cb := function($term, $data) {
+                        <key term="{$term}" frequency="{$data[1]}" documents="{$data[2]}"/>
+                    }
+                    return util:index-keys-by-qname(
+                        QName("", "`{$element-name}`"), (), $cb, `{$max-keys}`, "`{$index-name}`"
                     )
+                ]``
+                return util:eval($query)
             else if ($index-type eq "Range Field") then
-                (: Range fields use a different lookup :)
                 try {
-                    let $range-lookup := function-lookup(xs:QName("range:index-keys-for-field"), 4)
+                    let $range-lookup := (
+                        function-lookup(xs:QName("range:index-keys-for-field"), 4),
+                        function-lookup(xs:QName("range:index-keys-for-field"), 3)
+                    )[1]
                     return
                         if (exists($range-lookup)) then
-                            $range-lookup($qname, (), $callback, $max-keys)
+                            if (function-arity($range-lookup) = 4) then
+                                collection($collection)/$range-lookup($qname, (), $callback, $max-keys)
+                            else
+                                collection($collection)/$range-lookup($qname, $callback, $max-keys)
                         else ()
                 } catch * { () }
             else
-                (: Standard range indexes — query the collection :)
-                let $nodes := collection($data-collection)//*[local-name() eq $qname]
+                (: Standard range indexes :)
+                let $nodes := idx:get-nodeset($collection, $qname)
                 return
                     if (exists($nodes)) then
-                        util:index-keys($nodes, (), $callback, $max-keys)
+                        let $query := ``[
+                            let $nodes := collection("`{$collection}`")//*[local-name() eq "`{$element-name}`"]
+                            let $cb := function($term, $data) {
+                                <key term="{$term}" frequency="{$data[1]}" documents="{$data[2]}"/>
+                            }
+                            return util:index-keys($nodes, (), $cb, `{$max-keys}`)
+                        ]``
+                        return util:eval($query)
                     else ()
         } catch * {
-            (: Index query failed — return empty :)
             ()
         }
     return map {
         "collection": $collection,
         "item": $qname,
         "type": $index-type,
-        "keys": array { $keys }
+        "keys": array {
+            for $k in $keys
+            return map {
+                "term": string($k/@term),
+                "frequency": xs:integer($k/@frequency),
+                "documents": xs:integer($k/@documents)
+            }
+        }
     }
 };
 
@@ -204,6 +276,7 @@ declare %private function idx:analyze-ngram($xconf as element(cc:collection)) as
     return map {
         "type": "NGram",
         "item": string($ngram/@qname),
+        "has-qname": true(),
         "analyzer": "",
         "boost": "",
         "facets": array {},

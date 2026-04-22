@@ -7,6 +7,18 @@ import * as api from './collections-api.js';
 
 function el(id) { return document.getElementById(id); }
 
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // Brief visual feedback
+        const toast = document.createElement('div');
+        toast.className = 'copy-toast';
+        toast.textContent = 'Copied: ' + text;
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('visible'));
+        setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 200); }, 1500);
+    });
+}
+
 function escapeHtml(str) {
     const d = document.createElement('div');
     d.textContent = str;
@@ -46,6 +58,25 @@ function isCollection(item) {
     return item.type === 'collection';
 }
 
+/** Determine CSS icon class for a resource, matching eXide's logic. */
+function fileIconClass(item) {
+    const mime = item.mime || '';
+    const name = item.name || '';
+    // Mime-based
+    if (mime === 'application/pdf') return 'file-pdf';
+    if (/^image\//.test(mime)) return 'file-image';
+    if (/xml|html/.test(mime)) return 'file-code';
+    if (/^text\/|javascript|json|css/.test(mime)) return 'file-text';
+    if (/zip|compress|archive|xar|jar/.test(mime)) return 'file-archive';
+    // Extension-based fallback
+    if (/\.(xml|xq|xquery|xql|xqm|xconf|xhtml|html|htm|svg|xsl|xslt|odd|rng|sch|wsdl)$/i.test(name)) return 'file-code';
+    if (/\.(css|less|scss|js|json|md|txt|csv|properties)$/i.test(name)) return 'file-text';
+    if (/\.(png|jpe?g|gif|ico|webp|bmp|tiff?)$/i.test(name)) return 'file-image';
+    if (/\.pdf$/i.test(name)) return 'file-pdf';
+    if (/\.(zip|tar|gz|xar|jar|war|ear)$/i.test(name)) return 'file-archive';
+    return 'file';
+}
+
 function isTextMime(mime) {
     if (!mime) return false;
     if (mime.startsWith('text/')) return true;
@@ -61,6 +92,14 @@ function isBinary(item) {
     if (isTextMime(mime)) return false;
     if (mime.startsWith('image/') || mime.startsWith('audio/') || mime.startsWith('video/')) return true;
     if (mime === 'application/octet-stream' || mime === 'application/pdf' || mime === 'application/zip') return true;
+    // Fallback: check extension when mime is missing (exist-api listings omit mime)
+    if (!mime) {
+        const name = item.name || '';
+        if (/\.(png|jpe?g|gif|ico|webp|bmp|tiff?|svg)$/i.test(name)) return true;
+        if (/\.(pdf)$/i.test(name)) return true;
+        if (/\.(zip|xar|jar|tar|gz|war|ear)$/i.test(name)) return true;
+        if (/\.(class|so|dll|exe|bin|dat|woff2?|ttf|eot|mp3|mp4|ogg|wav|avi)$/i.test(name)) return true;
+    }
     return false;
 }
 
@@ -438,7 +477,7 @@ function renderResources() {
         const path = item.path;
         const checked = selectedPaths.has(path) ? ' checked' : '';
         const cut = clipboard?.mode === 'move' && clipboard.paths.includes(path) ? ' class="cut-item"' : '';
-        const icon = isCollection(item) ? 'folder' : 'file';
+        const icon = isCollection(item) ? 'folder' : fileIconClass(item);
         const typeStr = isCollection(item) ? 'collection' : (item.mime || '');
         const sizeStr = isCollection(item) ? '' : formatBytes(item.size || 0);
         const dateStr = formatDate(item.modified);
@@ -501,6 +540,10 @@ async function navigateTo(path) {
     highlightTreeNode(path);
     await expandTreeToPath(path);
     el('coll-up-btn').disabled = path === '/db';
+
+    // Scroll tree sidebar to show the active node
+    const activeRow = document.querySelector(`.tree-node[data-path="${CSS.escape(path)}"] > .tree-node-row`);
+    if (activeRow) activeRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 // ── Selection ─────────────────────────────────
@@ -660,10 +703,14 @@ async function showPreview(item) {
     const body = el('preview-body');
     const exideBtn = el('preview-exide');
     const downloadBtn = el('preview-download');
+    const copyPathBtn = el('preview-copy-path');
 
     title.textContent = item.name;
     body.innerHTML = '<div style="text-align:center;padding:2rem"><span class="spinner"></span> Loading...</div>';
     dialog.hidden = false;
+
+    // Copy path button
+    if (copyPathBtn) copyPathBtn.onclick = () => copyToClipboard(path);
 
     // Show/hide eXide button based on file type
     if (isBinary(item)) {
@@ -674,6 +721,32 @@ async function showPreview(item) {
     }
     downloadBtn.onclick = () => { api.downloadResource(path); };
 
+    const name = item.name || '';
+    const mime = item.mime || '';
+    const isBinaryContent = isBinary(item);
+    const isImage = mime.startsWith('image/') || (!mime && /\.(png|jpe?g|gif|ico|webp|bmp|tiff?|svg)$/i.test(name));
+    const isPdf = mime === 'application/pdf' || (!mime && /\.pdf$/i.test(name));
+
+    // For images and PDFs, fetch raw binary directly from REST API
+    if (isBinaryContent && (isImage || isPdf)) {
+        try {
+            const existBase = location.pathname.replace(/\/apps\/dashboard.*$/, '');
+            const rawResp = await fetch(`${existBase}/rest${path}`, { credentials: 'include' });
+            if (!rawResp.ok) throw new Error('fetch failed');
+            const blob = await rawResp.blob();
+            const url = URL.createObjectURL(blob);
+            if (isImage) {
+                body.innerHTML = `<div class="preview-image"><img src="${url}" alt="${escapeHtml(item.name)}"/></div>`;
+            } else {
+                body.innerHTML = `<iframe class="preview-pdf" src="${url}"></iframe>`;
+            }
+        } catch {
+            body.innerHTML = '<div class="empty-state">Failed to load preview</div>';
+        }
+        return;
+    }
+
+    // For text/XML, use the JSON API
     const result = await api.getResource(path);
     if (!result.ok || !result.data) {
         body.innerHTML = '<div class="empty-state">Failed to load resource</div>';
@@ -681,26 +754,11 @@ async function showPreview(item) {
     }
 
     const data = result.data;
-    const mime = data['mime-type'] || item.mime || '';
-
+    const dataMime = data['mime-type'] || mime;
     const content = data.content || '';
-    const isBinaryContent = data.binary && !isTextMime(mime);
 
-    if (isBinaryContent && mime.startsWith('image/')) {
-        // Image preview — create blob from raw bytes
-        const bytes = new Uint8Array(content.length);
-        for (let i = 0; i < content.length; i++) bytes[i] = content.charCodeAt(i) & 0xFF;
-        const blob = new Blob([bytes], { type: mime });
-        const url = URL.createObjectURL(blob);
-        body.innerHTML = `<div class="preview-image"><img src="${url}" alt="${escapeHtml(item.name)}"/></div>`;
-    } else if (isBinaryContent && mime === 'application/pdf') {
-        const bytes = new Uint8Array(content.length);
-        for (let i = 0; i < content.length; i++) bytes[i] = content.charCodeAt(i) & 0xFF;
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        body.innerHTML = `<iframe class="preview-pdf" src="${url}"></iframe>`;
-    } else if (isBinaryContent) {
-        const size = formatBytes(content.length);
+    if (isBinaryContent) {
+        const size = formatBytes(item.size || 0);
         body.innerHTML = `<div class="preview-binary">
             <div class="preview-binary-icon">&#128462;</div>
             <div class="preview-binary-info">
@@ -1065,6 +1123,7 @@ function showContextMenu(e) {
     menuItems.push({ type: 'separator' });
     menuItems.push({ label: 'Delete', action: () => doDelete(), danger: true });
     menuItems.push({ type: 'separator' });
+    menuItems.push({ label: 'Copy path', action: () => copyToClipboard(path) });
     menuItems.push({ label: 'Properties...', action: () => showPermissionsDialog() });
 
     for (const mi of menuItems) {
@@ -1348,8 +1407,9 @@ async function init() {
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeydown);
 
-    // Navigate to /db on load
-    navigateTo('/db');
+    // Navigate to requested collection (from ?collection= param) or /db
+    const urlCollection = new URLSearchParams(location.search).get('collection');
+    navigateTo(urlCollection || '/db');
 }
 
 if (document.readyState === 'loading') {

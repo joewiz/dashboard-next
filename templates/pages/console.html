@@ -1,42 +1,43 @@
 <div data-template="app:active-tab">
     <div class="console-page">
         <header class="page-header">
-            <h1>Console</h1>
-            <p>Execute XQuery with admin privileges and view results.</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+                <div>
+                    <h1>Console <small style="font-size:0.5em;font-weight:400;color:#888;">Remote Development Console</small></h1>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <span id="console-status" class="status-badge status-off">Connecting...</span>
+                    <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;">
+                        Channel: <input type="text" id="channel-input" value="default" class="input-md"/>
+                    </label>
+                    <button type="button" id="set-channel" class="btn btn-sm btn-primary">Set</button>
+                    <button type="button" id="clear-console" class="btn btn-sm">Clear</button>
+                </div>
+            </div>
         </header>
 
-        <div class="console-editor">
-            <div class="toolbar">
-                <button type="button" id="run-btn" class="btn btn-primary" title="Ctrl+Enter">Run</button>
-                <button type="button" id="cancel-btn" class="btn" disabled="">Cancel</button>
-                <label class="toolbar-select">
-                    Output:
-                    <select id="serialization">
-                        <option value="adaptive" selected="">Adaptive</option>
-                        <option value="xml">XML</option>
-                        <option value="json">JSON</option>
-                        <option value="text">Text</option>
-                    </select>
-                </label>
-                <span id="console-status" class="status-badge status-off">Ready</span>
+        <div class="monitor-section">
+            <div class="scrollable-table" style="max-height:500px;">
+                <table class="data-table" id="console-table">
+                    <thead>
+                        <tr>
+                            <th style="width:100px">Timestamp</th>
+                            <th style="width:150px">Source</th>
+                            <th style="width:80px">Line/Column</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody id="console-body">
+                        <tr><td colspan="4" class="empty-state">No messages</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <textarea id="query-input" rows="10" spellcheck="false"
-                      placeholder="Enter XQuery expression...">for $i in 1 to 10&#10;return $i</textarea>
         </div>
 
-        <div class="console-output">
-            <div class="toolbar">
-                <span class="toolbar-label">Results</span>
-                <span id="result-info" class="toolbar-detail"></span>
-                <button type="button" id="clear-output" class="btn btn-sm">Clear</button>
-            </div>
-            <pre id="result-panel" class="result-panel"></pre>
-            <div id="error-panel" class="error-panel" hidden=""></div>
-        </div>
-
-        <div class="console-history">
-            <h2>Query History</h2>
-            <ul id="history-list"></ul>
+        <div class="console-note">
+            <p><strong>Note:</strong> Use the <code>console:log</code> functions in your XQuery to send messages to the remote console. For example:</p>
+            <pre class="console-example">import module namespace console="http://exist-db.org/xquery/console";
+console:log("Hello world!")</pre>
         </div>
     </div>
     <script type="module" src="resources/js/console.js"></script>

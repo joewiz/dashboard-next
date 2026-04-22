@@ -1,117 +1,179 @@
 <div data-template="app:active-tab">
     <div class="monitoring-page">
         <div data-template="app:jmx-token"/>
-        <header class="page-header">
-            <h1>Monitoring</h1>
-            <p>Real-time JMX monitoring: memory, threads, caches, active brokers.</p>
-        </header>
 
-        <!-- Memory chart -->
-        <div class="monitor-section">
-            <h2>Heap Memory</h2>
-            <div class="chart-container">
-                <canvas id="memory-chart" height="180"></canvas>
+        <!-- Row 1: Stat cards -->
+        <div class="stats-row-4">
+            <div class="stat-card-sm">
+                <span class="stat-card-label">Active DB Processes</span>
+                <span class="stat-card-value" id="stat-brokers">--</span>
             </div>
-            <div class="monitor-row" id="memory-stats">
-                <div class="monitor-stat">
-                    <span class="monitor-label">Used</span>
-                    <span class="monitor-value" id="mem-used">--</span>
+            <div class="stat-card-sm">
+                <span class="stat-card-label">Uptime</span>
+                <span class="stat-card-value" id="stat-uptime">--</span>
+            </div>
+            <div class="stat-card-sm">
+                <span class="stat-card-label">Running Queries</span>
+                <span class="stat-card-value" id="stat-queries">--</span>
+            </div>
+            <div class="stat-card-sm">
+                <span class="stat-card-label">Waiting Threads</span>
+                <span class="stat-card-value" id="stat-waiting">0</span>
+            </div>
+        </div>
+
+        <!-- Row 2: Java Memory (full-width — chart left, progress bars right, GC below) -->
+        <div class="monitor-section">
+            <h2>Java Memory</h2>
+            <div class="monitor-memory-layout">
+                <div class="chart-container" style="flex:3">
+                    <canvas id="memory-chart" height="180"></canvas>
                 </div>
-                <div class="monitor-stat">
-                    <span class="monitor-label">Committed</span>
-                    <span class="monitor-value" id="mem-committed">--</span>
+                <div class="memory-bars">
+                    <div class="mem-bar-group">
+                        <div class="mem-bar-header">
+                            <span><span class="mem-indicator green"></span> Memory Used</span>
+                            <small id="mem-used-pct">-- / -- M</small>
+                        </div>
+                        <div class="progress-bar-container xs">
+                            <div class="progress-bar green" id="mem-used-bar" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="mem-bar-group">
+                        <div class="mem-bar-header">
+                            <span><span class="mem-indicator green"></span> Memory Committed</span>
+                            <small id="mem-committed-pct">-- / -- M</small>
+                        </div>
+                        <div class="progress-bar-container xs">
+                            <div class="progress-bar green" id="mem-committed-bar" style="width:0%"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="monitor-stat">
-                    <span class="monitor-label">Max</span>
-                    <span class="monitor-value" id="mem-max">--</span>
+            </div>
+            <div style="margin-top:0.5rem;">
+                <button type="button" id="gc-btn" class="btn btn-sm">Garbage Collect</button>
+            </div>
+        </div>
+
+        <!-- Row 3: two-col — left: Settings + Running Jobs + System Info; right: Brokers chart + Cache Usage -->
+        <div class="monitor-2col">
+            <div>
+                <!-- Settings -->
+                <div class="monitor-section monitor-section-tight">
+                    <h2>Settings</h2>
+                    <div class="settings-row">
+                        <span class="settings-label">Update Frequency (in sec.)</span>
+                        <output id="poll-interval-val" class="range-value">3 sec</output>
+                        <input type="range" id="poll-interval" value="3" min="1" max="60" step="1"/>
+                        <span class="range-max">60 sec</span>
+                    </div>
+                    <div style="text-align:right;margin-top:0.5rem;">
+                        <button type="button" id="pause-btn" class="btn btn-sm btn-app">Pause</button>
+                    </div>
                 </div>
-                <div class="monitor-stat">
-                    <button type="button" id="gc-btn" class="btn btn-sm">Run GC</button>
+
+                <!-- Running Jobs -->
+                <div class="monitor-section monitor-section-tight">
+                    <h2>Running Jobs</h2>
+                    <table class="data-table compact">
+                        <thead><tr><th>Action</th><th>Id</th><th>Info</th></tr></thead>
+                        <tbody id="jobs-body">
+                            <tr><td colspan="3" class="empty-state">No running jobs</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- System Information -->
+                <div class="monitor-section monitor-section-tight">
+                    <h2>System Information</h2>
+                    <table class="info-table compact">
+                        <thead><tr><th>Key</th><th>Value</th></tr></thead>
+                        <tbody id="sysinfo-body">
+                            <tr><td colspan="2" class="empty-state">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <!-- Database Brokers chart -->
+                <div class="monitor-section">
+                    <h2>Database Brokers</h2>
+                    <div class="chart-container">
+                        <canvas id="brokers-chart" height="140"></canvas>
+                    </div>
+                </div>
+
+                <!-- Cache Usage -->
+                <div class="monitor-section monitor-section-tight">
+                    <h2>Cache Usage</h2>
+                    <div id="caches-container">
+                        <div class="empty-state">Loading...</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- CPU -->
+        <!-- Row 4: Running Queries (full-width) -->
         <div class="monitor-section">
-            <h2>CPU</h2>
-            <div class="chart-container">
-                <canvas id="cpu-chart" height="120"></canvas>
-            </div>
-            <div class="monitor-row" id="cpu-stats">
-                <div class="monitor-stat">
-                    <span class="monitor-label">Process CPU</span>
-                    <span class="monitor-value" id="cpu-process">--</span>
-                </div>
-                <div class="monitor-stat">
-                    <span class="monitor-label">System CPU</span>
-                    <span class="monitor-value" id="cpu-system">--</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Brokers & Queries -->
-        <div class="monitor-grid">
-            <div class="monitor-section">
-                <h2>Database Brokers</h2>
-                <div class="monitor-row">
-                    <div class="monitor-stat">
-                        <span class="monitor-label">Active</span>
-                        <span class="monitor-value" id="brokers-active">--</span>
-                    </div>
-                    <div class="monitor-stat">
-                        <span class="monitor-label">Total</span>
-                        <span class="monitor-value" id="brokers-total">--</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="monitor-section">
-                <h2>Running Queries</h2>
+            <h2>Running Queries</h2>
+            <div class="scrollable-table">
                 <table class="data-table" id="queries-table">
-                    <thead>
-                        <tr><th>Source</th><th>Elapsed</th><th></th></tr>
-                    </thead>
+                    <thead><tr><th>Id</th><th>Source</th><th>URI</th><th>Status</th><th></th></tr></thead>
                     <tbody id="queries-body">
-                        <tr><td colspan="3" class="empty-state">No running queries</td></tr>
+                        <tr><td colspan="5" class="empty-state">No running queries</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Caches -->
+        <!-- Row 5: Recent Queries (full-width) + config controls below -->
         <div class="monitor-section">
-            <h2>Caches</h2>
-            <table class="data-table" id="caches-table">
-                <thead>
-                    <tr><th>Cache</th><th>Used</th><th>Max</th><th>Hits</th><th>Misses</th><th>Usage</th></tr>
-                </thead>
-                <tbody id="caches-body">
-                    <tr><td colspan="6" class="empty-state">Loading...</td></tr>
-                </tbody>
-            </table>
+            <h2>Recent Queries</h2>
+            <div class="scrollable-table">
+                <table class="data-table" id="history-table">
+                    <thead><tr><th>Time</th><th>Source</th><th>Elapsed Time</th><th>Request URI</th></tr></thead>
+                    <tbody id="history-body">
+                        <tr><td colspan="4" class="empty-state">No recent queries</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="history-config">
+                <label><strong>Min query time (ms):</strong> <input type="text" id="threshold" class="input-md" value="10"/></label>
+                <label><strong>Keep history for (ms):</strong> <input type="text" id="history-timespan" class="input-md" value="120000"/></label>
+                <label><input type="checkbox" id="track-uri"/> <strong>Track request URI</strong></label>
+                <button type="button" id="configure-history-btn" class="btn btn-primary">Set</button>
+            </div>
         </div>
 
-        <!-- Active Threads -->
-        <div class="monitor-section">
-            <h2>Active Threads</h2>
-            <table class="data-table" id="threads-table">
-                <thead>
-                    <tr><th>Thread</th><th>State</th></tr>
-                </thead>
-                <tbody id="threads-body">
-                    <tr><td colspan="2" class="empty-state">Loading...</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- Row 6: Waiting Threads + Active Threads -->
+        <div class="monitor-2col">
+            <div class="monitor-section monitor-section-tight">
+                <h2>Waiting Threads</h2>
+                <table class="data-table" id="waiting-table">
+                    <thead><tr><th>Resource</th><th>Waiting for</th></tr></thead>
+                    <tbody id="waiting-body">
+                        <tr><td colspan="2" class="empty-state">No waiting threads</td></tr>
+                    </tbody>
+                </table>
+            </div>
 
-        <!-- Recent Query History -->
+            <div class="monitor-section monitor-section-tight">
+                <h2>Active Threads</h2>
+                <table class="data-table" id="threads-table">
+                    <thead><tr><th>Thread</th></tr></thead>
+                    <tbody id="threads-body">
+                        <tr><td class="empty-state">No active threads</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Row 7: Scheduled Jobs -->
         <div class="monitor-section">
-            <h2>Recent Query History</h2>
-            <table class="data-table" id="history-table">
-                <thead>
-                    <tr><th>Source</th><th>Duration (ms)</th><th>Request URI</th></tr>
-                </thead>
-                <tbody id="history-body">
+            <h2>Scheduled Jobs</h2>
+            <table class="data-table" id="scheduled-jobs-table">
+                <thead><tr><th>Name</th><th>Group</th><th>Info</th></tr></thead>
+                <tbody id="scheduled-jobs-body">
                     <tr><td colspan="3" class="empty-state">Loading...</td></tr>
                 </tbody>
             </table>

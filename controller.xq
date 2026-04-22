@@ -43,11 +43,12 @@ declare variable $local:tabs := map {
     "collections": "collections",
     "packages":    "packages",
     "users":       "users",
+    "backup":      "backup",
     "monitoring":  "monitoring",
     "profiling":   "profiling",
     "console":     "console",
     "indexes":     "indexes",
-    "system":      "system"
+    "system":      "monitoring"
 };
 
 (:~ Tabs accessible without login :)
@@ -181,7 +182,32 @@ if ($local:is-get and $exist:path eq '') then (
 ) else if ($local:is-get and $exist:path eq '/indexes/data') then (
     local:api("indexes-data")
 ) else if ($local:is-get and $exist:path eq '/indexes/keys') then (
-    local:api("indexes-keys")
+    if (not(local:is-dba())) then (
+        response:set-status-code(403),
+        <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+            <forward url="{$exist:controller}/modules/api.xq">
+                <set-attribute name="api-action" value="forbidden"/>
+            </forward>
+        </dispatch>
+    ) else
+        <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+            <forward url="{$exist:controller}/modules/indexes-keys.xql"/>
+        </dispatch>
+
+(: --- Backup API (direct forward — backup.xql handles its own serialization) --- :)
+
+) else if ($exist:path eq '/backup/data') then (
+    if (not(local:is-dba())) then (
+        response:set-status-code(403),
+        <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+            <forward url="{$exist:controller}/modules/api.xq">
+                <set-attribute name="api-action" value="forbidden"/>
+            </forward>
+        </dispatch>
+    ) else
+        <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+            <forward url="{$exist:controller}/modules/backup.xql"/>
+        </dispatch>
 
 (: --- System API --- :)
 

@@ -10,6 +10,7 @@
                 <option value="">Loading collections...</option>
             </select>
             <button type="button" id="idx-refresh" class="btn">Refresh</button>
+            <a id="idx-exide-link" href="#" target="_blank" class="btn btn-sm" hidden="">Open .xconf in eXide</a>
         </div>
 
         <div id="idx-summary" class="monitor-row" hidden="">
@@ -30,14 +31,13 @@
         <table class="data-table" id="idx-table">
             <thead>
                 <tr>
-                    <th>Indexed Item</th>
-                    <th>Index Type</th>
-                    <th>Details</th>
-                    <th/>
+                    <th>Item Indexed</th>
+                    <th>Index</th>
+                    <th>Show Index Keys By</th>
                 </tr>
             </thead>
             <tbody id="idx-body">
-                <tr><td colspan="4" class="empty-state">Select a collection to view its index configuration</td></tr>
+                <tr><td colspan="3" class="empty-state">Select a collection to view its index configuration</td></tr>
             </tbody>
         </table>
 

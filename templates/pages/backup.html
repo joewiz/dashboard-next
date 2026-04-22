@@ -1,0 +1,41 @@
+<div data-template="app:active-tab">
+    <div class="backup-page">
+        <header class="page-header">
+            <h1>Backup</h1>
+            <p>Create and download database backups.</p>
+        </header>
+
+        <div class="monitor-section">
+            <h2>Create Backup</h2>
+            <div class="backup-options">
+                <label class="backup-checkbox">
+                    <input type="checkbox" id="zip-checkbox"/>
+                    zip (Don't use for database with more than 4gb)
+                </label>
+                <label class="backup-checkbox">
+                    <input type="checkbox" id="inc-checkbox"/>
+                    incremental
+                </label>
+                <div style="margin-top:0.75rem;">
+                    <button type="button" id="trigger-backup-btn" class="btn">Trigger Backup</button>
+                </div>
+            </div>
+            <p class="backup-warning">For security reasons only zipped backups can be downloaded</p>
+        </div>
+
+        <div class="monitor-section">
+            <h2>Backups</h2>
+            <table class="data-table" id="backups-table">
+                <thead>
+                    <tr><th>Name</th><th>Created</th><th>Incremental</th><th></th></tr>
+                </thead>
+                <tbody id="backups-body">
+                    <tr><td colspan="4" class="empty-state">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="backup-status" class="backup-status" style="display:none;"></div>
+    </div>
+    <script type="module" src="resources/js/backup.js"></script>
+</div>

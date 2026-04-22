@@ -19,11 +19,11 @@
             <li><a href="[[ $context-path ]]/collections" class="[[ $tabs?collections ]]">Collections</a></li>
             <li><a href="[[ $context-path ]]/packages" class="[[ $tabs?packages ]]">Packages</a></li>
             <li><a href="[[ $context-path ]]/users" class="[[ $tabs?users ]]">Users</a></li>
+            <li><a href="[[ $context-path ]]/backup" class="[[ $tabs?backup ]]">Backup</a></li>
             <li><a href="[[ $context-path ]]/monitoring" class="[[ $tabs?monitoring ]]">Monitoring</a></li>
             <li><a href="[[ $context-path ]]/profiling" class="[[ $tabs?profiling ]]">Profiling</a></li>
             <li><a href="[[ $context-path ]]/console" class="[[ $tabs?console ]]">Console</a></li>
             <li><a href="[[ $context-path ]]/indexes" class="[[ $tabs?indexes ]]">Indexes</a></li>
-            <li><a href="[[ $context-path ]]/system" class="[[ $tabs?system ]]">System</a></li>
         </ul>
     </nav>
 

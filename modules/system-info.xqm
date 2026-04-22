@@ -41,7 +41,7 @@ declare function sysinfo:get-info() as map(*) {
         },
         "uptime": system:get-uptime() div xs:dayTimeDuration("PT0.001S"),
         "scheduler-jobs": array {
-            if (function-lookup(xs:QName("scheduler:get-scheduled-jobs"), 0)) then
+            if (exists(function-lookup(xs:QName("scheduler:get-scheduled-jobs"), 0))) then
                 let $jobs := scheduler:get-scheduled-jobs()
                 for $job in $jobs//scheduler:job
                 return map {
