@@ -1,20 +1,18 @@
 <div data-template="app:active-tab">
     <div class="console-page">
         <header class="page-header">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
-                <div>
-                    <h1>Console <small style="font-size:0.5em;font-weight:400;color:#888;">Remote Development Console</small></h1>
-                </div>
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <span id="console-status" class="status-badge status-off">Connecting...</span>
-                    <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;">
-                        Channel: <input type="text" id="channel-input" value="default" class="input-md"/>
-                    </label>
-                    <button type="button" id="set-channel" class="btn btn-sm btn-primary">Set</button>
-                    <button type="button" id="clear-console" class="btn btn-sm">Clear</button>
-                </div>
-            </div>
+            <h1>Console</h1>
+            <p>Remote development console for live XQuery logging and debugging.</p>
         </header>
+
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <span id="console-status" class="status-badge status-off">Connecting...</span>
+            <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;">
+                Channel: <input type="text" id="channel-input" value="default" class="input-md"/>
+            </label>
+            <button type="button" id="set-channel" class="btn btn-sm btn-primary">Set</button>
+            <button type="button" id="clear-console" class="btn btn-sm">Clear</button>
+        </div>
 
         <div class="monitor-section">
             <div class="scrollable-table" style="max-height:500px;">
