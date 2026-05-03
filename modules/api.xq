@@ -45,6 +45,8 @@ return
                         pkgs:remove(request:get-parameter("uri", ""))
                     default return
                         map { "error": "Unknown action" }
+        case "packages-upload" return
+            pkgs:upload(request:get-parameter("filename", ""))
 
         (: Users :)
         case "users-data" return

@@ -7,6 +7,8 @@ xquery version "3.1";
  :)
 module namespace pkgs="http://exist-db.org/apps/dashboard/packages";
 
+import module namespace hc="http://expath.org/ns/http-client";
+
 declare namespace templates="http://exist-db.org/xquery/html-templating";
 declare namespace expath="http://expath.org/ns/pkg";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
@@ -112,19 +114,61 @@ declare function pkgs:available() as map(*) {
 };
 
 (:~
- : Install a package from a URL.
+ : Install a package.
+ : Accepts: a /db path to a stored .xar, an http(s) URL pointing at a .xar
+ : download, or a package name (URI) resolvable through the public repo.
  :)
 declare function pkgs:install($url as xs:string) as map(*) {
     try {
         let $result :=
             if (starts-with($url, "/db")) then
                 repo:install-and-deploy-from-db($url)
+            else if (matches($url, "^https?://.+\.xar(\?.*)?$", "i")) then
+                let $stored := pkgs:download-to-repo($url)
+                return repo:install-and-deploy-from-db($stored)
             else
-                repo:install-and-deploy($url, "http://demo.exist-db.org/exist/apps/public-repo/modules/find.xql")
+                repo:install-and-deploy($url, "http://exist-db.org/exist/apps/public-repo/modules/find.xql")
         return map { "status": "installed", "result": string($result) }
     } catch * {
         map { "error": $err:description }
     }
+};
+
+(:~
+ : Download a .xar from an http(s) URL into /db/system/repo and return the
+ : stored path. Filename is derived from the URL (path segment, query stripped).
+ :)
+declare %private function pkgs:download-to-repo($url as xs:string) as xs:string {
+    let $filename := tokenize(replace($url, "\?.*$", ""), "/")[last()]
+    let $response := hc:send-request(<hc:request method="GET" href="{$url}"/>)
+    let $status := xs:integer($response[1]/@status)
+    return
+        if ($status ne 200) then
+            error(xs:QName("pkgs:download-failed"),
+                "Download failed (HTTP " || $status || ") for " || $url)
+        else
+            xmldb:store("/db/system/repo", $filename, $response[2], "application/octet-stream")
+};
+
+(:~
+ : Store an uploaded .xar binary to /db/system/repo and install it.
+ : Expects the request body to contain the .xar bytes.
+ :)
+declare function pkgs:upload($filename as xs:string) as map(*) {
+    if ($filename eq "" or matches($filename, "[/\\]") or not(ends-with(lower-case($filename), ".xar"))) then
+        map { "error": "Invalid filename; must be a .xar with no path separators" }
+    else
+        try {
+            let $data := request:get-data()
+            return
+                if (empty($data)) then
+                    map { "error": "Empty request body" }
+                else
+                    let $stored := xmldb:store("/db/system/repo", $filename, $data, "application/octet-stream")
+                    return pkgs:install("/db/system/repo/" || $filename)
+        } catch * {
+            map { "error": $err:description }
+        }
 };
 
 (:~

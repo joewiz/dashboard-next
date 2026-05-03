@@ -71,3 +71,104 @@ describe('Packages API endpoint', () => {
     }).its('status').should('eq', 403);
   });
 });
+
+describe('Package install via URL and upload', () => {
+  // A small, public .xar (airtable.xq v2.0.0) — chosen because it isn't part
+  // of the default install and is unlikely to clash with other test fixtures.
+  const xarUrl = 'https://github.com/joewiz/airtable.xq/releases/download/v2.0.0/airtable.xar';
+  const filename = 'airtable.xar';
+
+  // Look up any installed package whose abbrev/name contains "airtable" and remove it,
+  // so a leftover from a previous failed run doesn't hide regressions.
+  const cleanupAirtable = () => {
+    cy.request({ url: '/packages/data', failOnStatusCode: false }).then((resp) => {
+      if (!resp.body || !resp.body.packages) return;
+      resp.body.packages
+        .filter((p) =>
+          (p.abbrev || '').toLowerCase().includes('airtable') ||
+          (p.name || '').toLowerCase().includes('airtable')
+        )
+        .forEach((p) => {
+          cy.request({
+            method: 'POST',
+            url: `/packages/action?action=remove&uri=${encodeURIComponent(p.name)}`,
+            failOnStatusCode: false,
+          });
+        });
+    });
+  };
+
+  beforeEach(() => {
+    cy.loginApi();
+    cleanupAirtable();
+  });
+
+  afterEach(cleanupAirtable);
+
+  it('should install a package from an http URL', () => {
+    cy.request({
+      method: 'POST',
+      url: `/packages/action?action=install&url=${encodeURIComponent(xarUrl)}`,
+    }).then((resp) => {
+      expect(resp.status).to.eq(200);
+      expect(resp.body, JSON.stringify(resp.body)).to.have.property('status', 'installed');
+    });
+
+    cy.request('/packages/data').then((resp) => {
+      const found = resp.body.packages.some((p) =>
+        (p.abbrev || '').toLowerCase().includes('airtable') ||
+        (p.name || '').toLowerCase().includes('airtable')
+      );
+      expect(found, 'airtable package present after install').to.be.true;
+    });
+  });
+
+  it('should install a package via XAR upload', () => {
+    // Fetch the .xar bytes via the test runner (not the browser) so we can
+    // exercise the upload endpoint end-to-end without committing a binary fixture.
+    cy.request({ url: xarUrl, encoding: 'binary' }).then((download) => {
+      expect(download.status).to.eq(200);
+      const body = Cypress.Blob.binaryStringToBlob(download.body, 'application/octet-stream');
+      return cy.request({
+        method: 'POST',
+        url: `/packages/upload?filename=${encodeURIComponent(filename)}`,
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body,
+      });
+    }).then((resp) => {
+      expect(resp.status).to.eq(200);
+      expect(resp.body, JSON.stringify(resp.body)).to.have.property('status', 'installed');
+    });
+
+    cy.request('/packages/data').then((resp) => {
+      const found = resp.body.packages.some((p) =>
+        (p.abbrev || '').toLowerCase().includes('airtable') ||
+        (p.name || '').toLowerCase().includes('airtable')
+      );
+      expect(found, 'airtable package present after install').to.be.true;
+    });
+  });
+
+  it('should reject upload with invalid filename', () => {
+    cy.request({
+      method: 'POST',
+      url: '/packages/upload?filename=../evil.xar',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: 'PK\x03\x04',
+      failOnStatusCode: false,
+    }).then((resp) => {
+      expect(resp.body).to.have.property('error');
+    });
+  });
+
+  it('should require DBA authentication for upload', () => {
+    cy.clearCookies();
+    cy.request({
+      method: 'POST',
+      url: '/packages/upload?filename=foo.xar',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: 'PK\x03\x04',
+      failOnStatusCode: false,
+    }).its('status').should('eq', 403);
+  });
+});

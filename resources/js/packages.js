@@ -339,11 +339,12 @@ async function installFromUrl(url) {
     const resp = await fetch(`${BASE}/packages/action?action=install&url=${encodeURIComponent(url)}`, {
         method: 'POST', credentials: 'include'
     });
-    if (resp.ok) {
+    const result = await resp.json().catch(() => ({}));
+    if (resp.ok && !result.error) {
         showToast(`Installed package from ${url}`);
         loadAll();
     } else {
-        showToast('Installation failed. Check the URL and try again.', 'error');
+        showToast(`Installation failed${result.error ? ': ' + result.error : '. Check the URL and try again.'}`, 'error');
     }
 }
 
@@ -361,21 +362,17 @@ async function installByName(name) {
 }
 
 async function uploadXar(file) {
-    const base = location.pathname.replace(/^(.*?)\/(apps\/)?dashboard\/.*$/, '$1');
-    const tempPath = `/db/system/repo/${file.name}`;
-    const resp = await fetch(`${base}/rest${tempPath}`, {
-        method: 'PUT', credentials: 'include',
+    const resp = await fetch(`${BASE}/packages/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/octet-stream' },
         body: file
     });
-    if (resp.ok) {
-        await fetch(`${BASE}/packages/action?action=install&url=${encodeURIComponent(tempPath)}`, {
-            method: 'POST', credentials: 'include'
-        });
+    const result = await resp.json().catch(() => ({}));
+    if (resp.ok && !result.error) {
         showToast(`Installed "${file.name}"`);
         loadAll();
     } else {
-        showToast('Upload failed.', 'error');
+        showToast(`Upload failed${result.error ? ': ' + result.error : '.'}`, 'error');
     }
 }
 

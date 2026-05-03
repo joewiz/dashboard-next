@@ -165,6 +165,8 @@ if ($local:is-get and $exist:path eq '') then (
     local:api("packages-available")
 ) else if ($local:method eq 'post' and $exist:path eq '/packages/action') then (
     local:api("packages-action")
+) else if ($local:method eq 'post' and $exist:path eq '/packages/upload') then (
+    local:api("packages-upload")
 
 (: --- Users API --- :)
 
