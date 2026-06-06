@@ -189,7 +189,7 @@ declare function app:attr($node as node(), $model as map(*), $attr as xs:string,
  : Non-admin users see nothing.
  :)
 declare function app:if-admin($node as node(), $model as map(*)) as item()* {
-    let $user := request:get-attribute("org.exist.login.user.user")
+    let $user := request:get-attribute("org.exist.login.user")
     return
         if (exists($user) and sm:is-dba($user)) then
             templates:process($node/node(), $model)

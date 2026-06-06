@@ -12,11 +12,11 @@ declare variable $exist:resource external;
 declare variable $local:method := lower-case(request:get-method());
 declare variable $local:is-get := $local:method eq 'get';
 (: Read the roaster-compatible cookie to authenticate the current request :)
-declare variable $local:user := login:set-user("org.exist.login.user", (), false());
+declare variable $local:user := login:set-user("org.exist.login", (), false());
 
 (:~ Check if the current user is a DBA :)
 declare function local:is-dba() as xs:boolean {
-    let $user := request:get-attribute("org.exist.login.user.user")
+    let $user := request:get-attribute("org.exist.login.user")
     return exists($user) and sm:is-dba($user)
 };
 
@@ -60,7 +60,7 @@ declare variable $local:public-tabs := ("", "home", "collections");
  : Admin tabs require DBA login.
  :)
 declare function local:render-page($page as xs:string, $tab as xs:string) {
-    let $user := request:get-attribute("org.exist.login.user.user")
+    let $user := request:get-attribute("org.exist.login.user")
     let $is-admin := exists($user) and sm:is-dba($user)
     let $is-public := $tab = $local:public-tabs
     return
@@ -120,7 +120,7 @@ if ($local:is-get and $exist:path eq '') then (
 (: --- Logout: clear cookie and redirect to login page --- :)
 
 ) else if ($exist:path = '/logout') then (
-    response:set-cookie("org.exist.login.user", "deleted", xs:dayTimeDuration("-P1D"), false(), (),
+    response:set-cookie("org.exist.login", "deleted", xs:dayTimeDuration("-P1D"), false(), (),
         request:get-context-path()),
     session:invalidate(),
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
