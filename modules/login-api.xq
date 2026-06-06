@@ -3,7 +3,7 @@ xquery version "3.1";
 (:~
  : Login/logout API using Roaster.
  : Sets cookies compatible with exist-api's roaster-based auth.
- : Cookie name: org.exist.login.user (matches exist-api's cookieAuth scheme).
+ : Cookie name: org.exist.login (matches exist-api's cookieAuth scheme).
  :)
 
 declare namespace login="http://exist-db.org/apps/dashboard/login";
