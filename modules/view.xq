@@ -95,7 +95,7 @@ declare function local:context() as map(*) {
         "styles": array { "resources/css/exist-site.css", "resources/css/dashboard.css" },
         "site": map {
             "name": "eXist-db",
-            "logo": "resources/images/exist-logo.svg"
+            "logo": "resources/images/existdb-logo.svg"
         },
         "nav": map {
             "items": array {
