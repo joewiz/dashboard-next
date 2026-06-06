@@ -23,6 +23,14 @@ declare variable $config:app-root :=
         substring-before($modulePath, "/modules")
 ;
 
+(:~
+ : Collection of the shared exist-site-shell. The base-page.html layout,
+ : nav.xqm, and site-config.xqm come from the shell's exist-site profile and
+ : are resolved from here at runtime rather than copied into each app — see
+ : view.xq. exist-site-shell is a package dependency (expath-pkg.xml).
+ :)
+declare variable $config:shell-root := "/db/apps/exist-site-shell";
+
 declare variable $config:repo-descriptor := doc($config:app-root || "/repo.xml")/repo:meta;
 
 declare variable $config:expath-descriptor := doc($config:app-root || "/expath-pkg.xml")/expath:package;

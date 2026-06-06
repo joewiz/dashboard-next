@@ -6,9 +6,11 @@ xquery version "3.1";
  : Pass 1: Render page-specific templates via html-templating (data-template attrs)
  : Pass 2: Render page-content.tpl via Jinks (extends profile's base-page.html)
  :
- : The base-page.html, nav.xqm, site-config.xqm, and exist-site.css come from
- : the Jinks exist-site profile. After each `npm run deploy`, re-run the Jinks
- : generator to restore the profile files.
+ : base-page.html, nav.xqm, and site-config.xqm are provided by the exist-site
+ : profile and are resolved at runtime from the installed exist-site-shell
+ : ($config:shell-root) — not copied into this app. exist-site-shell is a
+ : package dependency, so the shared shell is the single source of truth and
+ : nothing needs regenerating after a deploy.
  :)
 
 import module namespace templates="http://exist-db.org/xquery/html-templating";
@@ -48,19 +50,32 @@ declare function local:load-resource($path as xs:string) as xs:string? {
 };
 
 (:~
- : Resolver for Jinks templates.
- : Handles both relative paths and absolute /db/ paths.
+ : Load a Jinks template from a single absolute collection path.
  :)
-declare function local:resolver($path as xs:string) as map(*)? {
-    let $effectivePath :=
-        if (starts-with($path, "/db/")) then $path
-        else $config:app-root || "/" || $path
+declare function local:resolve-at($effectivePath as xs:string) as map(*)? {
     let $content := local:load-resource($effectivePath)
     return
         if ($content) then
             map { "path": $effectivePath, "content": $content }
         else
             ()
+};
+
+(:~
+ : Resolver for Jinks templates.
+ : Absolute /db/ paths are used as-is. Relative paths resolve against the app
+ : root first, then fall back to the shared exist-site-shell — base-page.html
+ : and the other exist-site profile files live there and are no longer copied
+ : into this app (see $config:shell-root).
+ :)
+declare function local:resolver($path as xs:string) as map(*)? {
+    if (starts-with($path, "/db/")) then
+        local:resolve-at($path)
+    else
+        (
+            local:resolve-at($config:app-root || "/" || $path),
+            local:resolve-at($config:shell-root || "/" || $path)
+        )[1]
 };
 
 (:~
@@ -113,11 +128,11 @@ declare function local:render-full-page($htmlContent as item()*) {
                 "modules": map {
                     "http://exist-db.org/site/nav": map {
                         "prefix": "nav",
-                        "at": $config:app-root || "/modules/nav.xqm"
+                        "at": $config:shell-root || "/modules/nav.xqm"
                     },
                     "http://exist-db.org/site/shell-config": map {
                         "prefix": "site-config",
-                        "at": $config:app-root || "/modules/site-config.xqm"
+                        "at": $config:shell-root || "/modules/site-config.xqm"
                     }
                 }
             })
