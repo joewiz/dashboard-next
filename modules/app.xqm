@@ -14,7 +14,10 @@ import module namespace templates="http://exist-db.org/xquery/html-templating";
 declare namespace jmx="http://exist-db.org/jmx";
 
 import module namespace config="http://exist-db.org/apps/dashboard/config" at "config.xqm";
-import module namespace exfile="http://expath.org/ns/file";
+(: The JMX token is read with the W3C fn:unparsed-text family over a file://
+   URI rather than the EXPath File module (http://expath.org/ns/file), which is
+   not bundled with eXist 7 (see eXist-db/exist#6257). unparsed-text honours
+   file:// reads natively, so this drops the optional dependency. :)
 
 (:~
  : Inject the active tab name into the model.
@@ -64,8 +67,8 @@ declare function app:system-status($node as node(), $model as map(*)) as item()*
         try {
             let $token-file := system:get-exist-home() || "/data/jmxservlet.token"
             return
-                if (exfile:exists($token-file)) then
-                    let $content := exfile:read-text($token-file)
+                if (unparsed-text-available("file://" || $token-file)) then
+                    let $content := unparsed-text("file://" || $token-file)
                     (: Extract UUID token — last line, strip comments and whitespace :)
                     let $lines := tokenize($content, "\n")
                     let $token-lines :=
@@ -150,8 +153,8 @@ declare %private function app:read-jmx-token() as xs:string {
     try {
         let $token-file := system:get-exist-home() || "/data/jmxservlet.token"
         return
-            if (exfile:exists($token-file)) then
-                let $content := exfile:read-text($token-file)
+            if (unparsed-text-available("file://" || $token-file)) then
+                let $content := unparsed-text("file://" || $token-file)
                 let $lines := tokenize($content, "\n")
                 let $token-lines :=
                     for $line in $lines
