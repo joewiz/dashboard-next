@@ -14,6 +14,12 @@ declare namespace expath="http://expath.org/ns/pkg";
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~
+ : Public registry /find endpoint, passed to repo:install-and-deploy* so
+ : transitive dependencies are resolved from the registry during install.
+ :)
+declare variable $pkgs:registry-find := "https://exist-db.org/exist/apps/public-repo/find";
+
+(:~
  : List all installed packages as JSON.
  :)
 declare function pkgs:list() as map(*) {
@@ -122,16 +128,52 @@ declare function pkgs:install($url as xs:string) as map(*) {
     try {
         let $result :=
             if (starts-with($url, "/db")) then
-                repo:install-and-deploy-from-db($url)
+                pkgs:install-stored($url)
             else if (matches($url, "^https?://.+\.xar(\?.*)?$", "i")) then
-                let $stored := pkgs:download-to-repo($url)
-                return repo:install-and-deploy-from-db($stored)
+                pkgs:install-stored(pkgs:download-to-repo($url))
             else
-                repo:install-and-deploy($url, "http://exist-db.org/exist/apps/public-repo/modules/find.xql")
+                repo:install-and-deploy($url, $pkgs:registry-find)
         return map { "status": "installed", "result": string($result) }
     } catch * {
         map { "error": $err:description }
     }
+};
+
+(:~
+ : Read the package name (expath:package/@name) from a stored .xar without
+ : deploying it, by unzipping just its expath-pkg.xml descriptor.
+ :)
+declare %private function pkgs:xar-package-name($stored as xs:string) as xs:string? {
+    try {
+        let $meta :=
+            compression:unzip(
+                util:binary-doc($stored),
+                function($path as xs:anyURI, $type as xs:string, $param as item()*) as xs:boolean {
+                    $path = "expath-pkg.xml"
+                },
+                (),
+                function($path as xs:anyURI, $type as xs:string, $data as item()?, $param as item()*) as item()? {
+                    $data
+                },
+                ()
+            )
+        return $meta//expath:package/@name/string()[. ne ""]
+    } catch * { () }
+};
+
+(:~
+ : Install a .xar already stored in the database. Any previously installed copy
+ : of the same package is undeployed and removed first (rather than relying on
+ : install-and-deploy-from-db idempotency), then the upload is installed with the
+ : public registry's /find endpoint so transitive dependencies are resolved.
+ :)
+declare %private function pkgs:install-stored($stored as xs:string) {
+    let $name := pkgs:xar-package-name($stored)
+    let $pre-removal :=
+        if (exists($name) and $name = repo:list())
+        then try { repo:undeploy($name), repo:remove($name) } catch * { () }
+        else ()
+    return repo:install-and-deploy-from-db($stored, $pkgs:registry-find)
 };
 
 (:~
