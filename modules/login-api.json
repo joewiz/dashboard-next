@@ -11,7 +11,7 @@
         "securitySchemes": {
             "cookieAuth": {
                 "type": "apiKey",
-                "name": "org.exist.login.user",
+                "name": "org.exist.login",
                 "in": "cookie"
             }
         }

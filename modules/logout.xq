@@ -8,11 +8,11 @@ import module namespace login="http://exist-db.org/xquery/login"
     at "resource:org/exist/xquery/modules/persistentlogin/login.xql";
 
 (: Clear the persistent login by passing logout=true :)
-let $_ := login:set-user("org.exist.login.user", (), false())
+let $_ := login:set-user("org.exist.login", (), false())
 
 (: Expire the login cookie :)
 let $context-path := request:get-context-path()
-let $_ := response:set-cookie("org.exist.login.user", "", xs:dayTimeDuration("-P1D"),
+let $_ := response:set-cookie("org.exist.login", "", xs:dayTimeDuration("-P1D"),
     false(), (), $context-path)
 
 (: Invalidate the HTTP session :)
